@@ -5,6 +5,7 @@ import {
   Light,
   Mesh,
   MeshBasicMaterial,
+  MeshStandardMaterial,
   PerspectiveCamera,
   PointLight,
   Scene,
@@ -36,7 +37,7 @@ export class Main {
     this.container.appendChild(this.renderer.domElement);
 
     const geometry = new BoxGeometry(1, 1, 1);
-    const material = new MeshBasicMaterial({ color: 0x004512 });
+    const material = new MeshStandardMaterial({ color: 0x004512 });
     this.cube = new Mesh(geometry, material);
     this.scene.add(this.cube);
 
@@ -45,9 +46,9 @@ export class Main {
     this.camera.position.z = 5;
     this.camera.position.y = 1;
 
-    this.light = new PointLight(0xffffff);
-    this.light.position.set(-1.5, 1.5, 1.5);
-    //  this.light.position.z = 3;
+    this.light = new DirectionalLight(0xffffff, 1);
+    // this.light.position.set(-1.5, 1.5, 1.5);
+     this.light.position.z = 3;
     //   this.light.position.x = 3;
     //   this.light.position.y = 3;
     this.scene.add(this.light);
@@ -67,7 +68,7 @@ export class Main {
     requestAnimationFrame(this.animate.bind(this));
 
     // Animation logic: rotate the cube
-    // this.cube.rotation.x += 0.01;
+    this.cube.rotation.x += 0.01;
     this.cube.rotation.y += 0.01;
     this.light.rotation.y += 0.01;
 
