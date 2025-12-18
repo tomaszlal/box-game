@@ -12,6 +12,7 @@ import {
   WebGLRenderer
 } from 'three';
 import { GameScene } from './view/GameScene';
+import { OrbitControls } from 'three/examples/jsm/Addons.js';
 
 export class Main {
   private scene!: Scene;
@@ -20,6 +21,7 @@ export class Main {
   private cube!: Mesh;
   private light!: Light;
   private container: HTMLElement;
+  private controls!: OrbitControls;
 
   constructor(containerId: string) {
     this.container = document.getElementById(containerId) as HTMLElement;
@@ -36,6 +38,10 @@ export class Main {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.container.appendChild(this.renderer.domElement);
 
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.05;
+
     const geometry = new BoxGeometry(1, 1, 1);
     const material = new MeshStandardMaterial({ color: 0x004512 });
     this.cube = new Mesh(geometry, material);
@@ -48,7 +54,7 @@ export class Main {
 
     this.light = new DirectionalLight(0xffffff, 1);
     // this.light.position.set(-1.5, 1.5, 1.5);
-     this.light.position.z = 3;
+    this.light.position.z = 3;
     //   this.light.position.x = 3;
     //   this.light.position.y = 3;
     this.scene.add(this.light);
@@ -71,6 +77,8 @@ export class Main {
     this.cube.rotation.x += 0.01;
     this.cube.rotation.y += 0.01;
     this.light.rotation.y += 0.01;
+
+    this.controls.update();
 
     this.renderer.render(this.scene, this.camera);
   }
