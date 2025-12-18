@@ -42,10 +42,8 @@ export class Main {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
 
-    const geometry = new BoxGeometry(1, 1, 1);
-    const material = new MeshStandardMaterial({ color: 0x004512 });
-    this.cube = new Mesh(geometry, material);
-    this.scene.add(this.cube);
+    this.createBox();
+    
 
     // Position the camera
     // this.camera.position.x = 1;
@@ -64,6 +62,13 @@ export class Main {
     this.animate();
   }
 
+  private createBox() {
+    const geometry = new BoxGeometry(1, 1, 1);
+    const material = new MeshStandardMaterial({ color: 0x004512 });
+    this.cube = new Mesh(geometry, material);
+    this.scene.add(this.cube);
+  }
+
   private onWindowResize(): void {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
@@ -74,9 +79,10 @@ export class Main {
     requestAnimationFrame(this.animate.bind(this));
 
     // Animation logic: rotate the cube
-    this.cube.rotation.x += 0.01;
-    this.cube.rotation.y += 0.01;
+    // this.cube.rotation.x += 0.01;
+    // this.cube.rotation.y += 0.01;
     this.light.rotation.y += 0.01;
+
 
     this.controls.update();
 
