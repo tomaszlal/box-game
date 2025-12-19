@@ -22,6 +22,7 @@ export class Main {
   private light!: Light;
   private container: HTMLElement;
   private controls!: OrbitControls;
+  private background!: any;
 
   constructor(containerId: string) {
     this.container = document.getElementById(containerId) as HTMLElement;
@@ -34,6 +35,7 @@ export class Main {
     this.camera = new PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
     this.renderer = new WebGLRenderer({ antialias: true });
 
+    this.renderer.shadowMap.enabled = true;
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.container.appendChild(this.renderer.domElement);
@@ -42,8 +44,12 @@ export class Main {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
 
-    this.createBox();
-    
+    this.cube = this.createBox();
+    this.cube.position.y = 1
+
+
+    this.background = this.createBackground();
+
 
     // Position the camera
     // this.camera.position.x = 1;
@@ -52,9 +58,9 @@ export class Main {
 
     this.light = new DirectionalLight(0xffffff, 1);
     // this.light.position.set(-1.5, 1.5, 1.5);
-    this.light.position.z = 3;
-    //   this.light.position.x = 3;
-    //   this.light.position.y = 3;
+    this.light.position.z = 2;
+    this.light.position.x = 2;
+    this.light.position.y = 2;
     this.scene.add(this.light);
 
     // 3. Set up event listeners and start the animation loop
@@ -62,11 +68,22 @@ export class Main {
     this.animate();
   }
 
-  private createBox() {
+  private createBox(): Mesh {
     const geometry = new BoxGeometry(1, 1, 1);
-    const material = new MeshStandardMaterial({ color: 0x004512 });
-    this.cube = new Mesh(geometry, material);
-    this.scene.add(this.cube);
+    const material = new MeshStandardMaterial({ color: 0x007812 });
+    return this.newMesh(geometry, material);
+  }
+
+   private createBackground() {
+    const geometry = new BoxGeometry(10, 0.5, 10);
+    const material = new MeshStandardMaterial({ color: 0xffffff });
+   return this.newMesh(geometry, material);
+  }
+
+  private newMesh(geometry: BoxGeometry, material: MeshStandardMaterial): Mesh {
+    const mesh = new Mesh(geometry, material);
+    this.scene.add(mesh);
+    return mesh;
   }
 
   private onWindowResize(): void {
@@ -81,7 +98,7 @@ export class Main {
     // Animation logic: rotate the cube
     // this.cube.rotation.x += 0.01;
     // this.cube.rotation.y += 0.01;
-    this.light.rotation.y += 0.01;
+    // this.light.translateX(-0.01);
 
 
     this.controls.update();
