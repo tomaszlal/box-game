@@ -13,6 +13,8 @@ import {
 } from 'three';
 import { GameScene } from './view/GameScene';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
+import { GameRenderer } from './view/GameRenderer';
+import { GameDirector } from './controller/GameDirector';
 
 export class Main {
   private scene!: Scene;
@@ -22,7 +24,7 @@ export class Main {
   private light!: Light;
   private container: HTMLElement;
   private controls!: OrbitControls;
-  private background!: any;
+  private background!: Mesh;
 
   constructor(containerId: string) {
     this.container = document.getElementById(containerId) as HTMLElement;
@@ -32,12 +34,13 @@ export class Main {
     }
 
     this.scene = new GameScene();
-    this.camera = new PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
-    this.renderer = new WebGLRenderer({ antialias: true });
+    this.renderer = new GameRenderer();
+  
+    new GameDirector(this.scene, this.renderer);
+  
+    this.camera = new PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 100);
 
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+
     this.container.appendChild(this.renderer.domElement);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -57,6 +60,7 @@ export class Main {
     this.camera.position.y = 1;
 
     this.light = new DirectionalLight(0xffffff, 1);
+    this.light.castShadow = true;
     // this.light.position.set(-1.5, 1.5, 1.5);
     this.light.position.z = 2;
     this.light.position.x = 2;
@@ -74,14 +78,16 @@ export class Main {
     return this.newMesh(geometry, material);
   }
 
-   private createBackground() {
+  private createBackground() {
     const geometry = new BoxGeometry(10, 0.5, 10);
     const material = new MeshStandardMaterial({ color: 0xffffff });
-   return this.newMesh(geometry, material);
+    return this.newMesh(geometry, material);
   }
 
   private newMesh(geometry: BoxGeometry, material: MeshStandardMaterial): Mesh {
     const mesh = new Mesh(geometry, material);
+    mesh.receiveShadow = true;
+    mesh.castShadow = true;
     this.scene.add(mesh);
     return mesh;
   }
@@ -96,8 +102,8 @@ export class Main {
     requestAnimationFrame(this.animate.bind(this));
 
     // Animation logic: rotate the cube
-    // this.cube.rotation.x += 0.01;
-    // this.cube.rotation.y += 0.01;
+    this.cube.rotation.x += 0.01;
+    this.cube.rotation.y += 0.01;
     // this.light.translateX(-0.01);
 
 
