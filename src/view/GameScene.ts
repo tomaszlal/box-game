@@ -1,10 +1,13 @@
 import { Color, Scene } from "three";
 
-export class GameScene  extends Scene {
+export class GameScene extends Scene {
 
     constructor() {
-        super();    
+        super();
+        this.init();
+    }
 
+    private init() {
         this.background = new Color(0x001234);
     }
 }
