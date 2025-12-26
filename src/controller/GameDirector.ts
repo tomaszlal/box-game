@@ -1,7 +1,6 @@
 import {
     BoxGeometry,
     DirectionalLight,
-    Mesh,
     MeshStandardMaterial,
     PerspectiveCamera,
     Scene,
@@ -10,8 +9,9 @@ import {
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GameDirectionalLight } from "../view/GameDirectionalLight";
 import { Box } from "../elements/Box";
-import { TBox } from '../types/TypesElements';
-import { GravityController } from "./GravityController";
+import { TBox } from '../types/Types';
+import { MoveController } from "./MoveController";
+
 
 export class GameDirector {
     private camera: PerspectiveCamera;
@@ -19,43 +19,33 @@ export class GameDirector {
     private cube: Box;
     private background: Box;
     private light: DirectionalLight;
-    gravityController: any;
+    private moveController: MoveController;
 
     constructor(
         private scene: Scene,
         private renderer: WebGLRenderer
     ) {
-        this.camera = new PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
-        // Position the camera
-        this.camera.position.z = 7;
-        this.camera.position.y = 1.5;
+        this.camera = this.createCamera();
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.light = new GameDirectionalLight(0xffffff, 1);
         this.scene.add(this.light);
 
-
-
-
-
         this.cube = this.createCube();
         this.cube.position.y = 5
         this.background = this.createBackground();
-        this.gravityController = new GravityController(this.background.getPickPositionY());
-        this.gravityController.addGravity(this.cube);
+        this.moveController = new MoveController(this.background.getPickPositionY());
+        this.moveController.setPersonBox(this.cube);
 
-
-        // console.log(this.cube.getHeight());
-        // 3. Set up event listeners and start the animation loop
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
-
-        window.addEventListener('keydown', (event: KeyboardEvent) => {
-            if (event.code === 'Space') {
-                this.cube.jump();
-            }
-        });
-
         this.animate();
     }
+
+    private createCamera(): PerspectiveCamera {
+        const camera = new PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
+        // Position the camera
+        camera.position.z = 7;
+        camera.position.y = 1.5;
+        return camera;  }
 
     private createBoxElement(boxData: TBox): Box {
         const geometry = new BoxGeometry(boxData.width, boxData.height, boxData.depth);
@@ -93,15 +83,12 @@ export class GameDirector {
 
     private animate(): void {
         requestAnimationFrame(this.animate.bind(this));
-
         // Animation logic: rotate the cube
         // this.cube.rotation.x += 0.01;
         // this.cube.rotation.y += 0.01;
         // this.light.translateX(-0.01);
-
-        this.gravityController.update();
+        this.moveController.update();
         this.controls.update();
-
         this.renderer.render(this.scene, this.camera);
     }
 }

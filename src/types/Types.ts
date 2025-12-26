@@ -6,3 +6,11 @@ export type TBox = {
     depth: number;
     color: ColorRepresentation;
 }
+
+export enum KeyType{
+    FORWARD = "KeyW",
+    BACK = "KeyS",
+    LEFT = "KeyA",
+    RIGHT = "KeyD",
+    JUMP = "Space"
+}

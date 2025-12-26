@@ -17,7 +17,6 @@ export class Main {
       console.error('Container element not found!');
       return;
     }
-
     this.scene = new GameScene();
     this.renderer = new GameRenderer();
     this.container.appendChild(this.renderer.domElement);

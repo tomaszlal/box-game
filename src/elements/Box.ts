@@ -1,17 +1,11 @@
-import {
-    BoxGeometry,
-    Mesh,
-    MeshStandardMaterial
-} from "three";
+import { BoxGeometry, Mesh, MeshStandardMaterial } from "three";
 import gsap from "gsap";
-import { TimingUtils } from "../utils/TimingUtils";
+import { PromiseUtils, ResolvablePromise } from "../utils/PromiseUtils";
 
 export class Box extends Mesh {
-
     private onGround!: boolean;
-    private onJump!: boolean;
-    private readonly maxJumpHeight: number = 3;
-    private promiseJump: Promise<void> = Promise.resolve();
+    private canJump: boolean = true;
+    private promiseGravity: ResolvablePromise<void> = PromiseUtils.getResolvablePromise<void>();
 
     constructor(geometry: BoxGeometry, material: MeshStandardMaterial) {
         super(geometry, material);
@@ -22,41 +16,25 @@ export class Box extends Mesh {
         this.castShadow = true;
         this.receiveShadow = true;
         this.onGround = false;
-        this.onJump = false;
+        this.promiseGravity.resolve();
     }
 
     public async jump(height: number = 2): Promise<void> {
-        // console.log("try jump");
-        // if (Boolean(this.promiseJump)) {
-            await this.promiseJump.then(() => {
-                this.onJump = true;
-                console.log("kupa");
-            });
-        // }
-
-        //TODO: add await on gravity landing promis from gravity controller
-
-        if (this.onJump && !this.onGround) {
-            console.log(`dont jump   jump:${this.onJump} on ground:${this.onGround}`);
+        if (!this.canJump || !this.promiseGravity.resolved) {
+            console.log(`dont jump   jump:${this.canJump} on ground:${this.onGround}`);
             return;
         }
-
-        this.onJump = true;
+        this.canJump = false;
         const tl = gsap.timeline();
-        const newJumpHeight = this.position.y + height > this.maxJumpHeight ? this.maxJumpHeight : this.position.y + height;
-        this.promiseJump = new Promise<void>((resolve) => {
-            tl.to(this.position, {
-                y: newJumpHeight,
-                duration: 0.2,
-                ease: "power2.out",
-                onComplete: () => {
-
-                    this.onGround = false;
-                    resolve();
-                }
-            });
+        const jumpHeight = this.position.y + height;
+        tl.to(this.position, {
+            y: jumpHeight,
+            duration: 0.2,
+            ease: "power2.out",
+            onComplete: () => {
+                this.onGround = false;
+            },
         });
-
     }
 
     public getHeight(): number {
@@ -79,12 +57,15 @@ export class Box extends Mesh {
         this.onGround = onGround;
     }
 
-
-    public isOnJump(): boolean {
-        return this.onJump;
+    public isCanJump(): boolean {
+        return this.canJump;
     }
 
-    public setOnJump(onJump: boolean): void {
-        this.onJump = onJump;
+    public setCanJump(canJump: boolean): void {
+        this.canJump = canJump;
+    }
+
+    public setPromiseGravity(promiseGravity: ResolvablePromise<void>): void {
+        this.promiseGravity = promiseGravity;
     }
 }
