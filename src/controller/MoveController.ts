@@ -3,12 +3,16 @@ import { Box } from "../elements/Box";
 import { PromiseUtils } from '../utils/PromiseUtils';
 import { KeyType } from "../types/Types";
 import { singleton } from "tsyringe";
+import { Group } from "three";
 
 @singleton()
 export class MoveController {
 
     private boxex: Array<Box> = [];
+    private playerGroup!: Group;
     private personBox!: Box;
+    private readonly moveSpeed: number = 0.2;
+    private readonly sensitivity = 0.002;
 
     constructor(private groundPositionY: number) {
         this.init();
@@ -65,28 +69,37 @@ export class MoveController {
         });
     }
 
-    public getPersonBox(): Box {
-        return this.personBox;
+    public setPlayerGroup(player: Group) {
+        this.playerGroup = player;
+        this.personBox = this.playerGroup.children[0] as Box;
+        this.addMouseEventControl();
     }
 
-    public setPersonBox(personBox: Box): void {
-        this.personBox = personBox;
+    private addMouseEventControl() {
+        document.body.addEventListener('click', () => {
+            document.body.requestPointerLock();
+        });
+        document.addEventListener('mousemove', (event) => {
+            if (document.pointerLockElement === document.body) {
+                this.playerGroup.rotation.y -= event.movementX * this.sensitivity;
+            }
+        });
     }
 
     public onKey(e: KeyboardEvent) {
         console.log(e.code);
         switch (e.code) {
             case KeyType.BACK:
-
+                this.playerGroup.translateZ(this.moveSpeed);
                 break;
             case KeyType.RIGHT:
-
+                this.playerGroup.translateX(this.moveSpeed);
                 break;
             case KeyType.LEFT:
-
+                this.playerGroup.translateX(-this.moveSpeed);
                 break;
             case KeyType.FORWARD:
-
+                this.playerGroup.translateZ(-this.moveSpeed);
                 break;
             case KeyType.JUMP:
                 this.personBox.jump();
