@@ -16,10 +16,9 @@ import { MoveController } from "./MoveController";
 
 export class GameDirector {
     private camera: PerspectiveCamera;
-    // private controls: OrbitControls;
     private player!: Group;
     // private cube: Box;
-    private background: Box;
+    private floor: Box;
     private light: DirectionalLight;
     private moveController: MoveController;
 
@@ -28,16 +27,14 @@ export class GameDirector {
         private renderer: WebGLRenderer
     ) {
         this.camera = this.createCamera();
-        // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.light = new GameDirectionalLight(0xffffff, 1);
         this.scene.add(this.light);
 
         this.player = this.createCharacterCube(this.camera);
-        // this.player.position.y = 5
         this.scene.add(this.player);
-        this.background = this.createBackground();
-        this.scene.add(this.background);
-        this.moveController = new MoveController(this.background.getPickPositionY());
+        this.floor = this.createFloor();
+        this.scene.add(this.floor);
+        this.moveController = new MoveController(this.floor.getPickPositionY());
         this.moveController.setPlayerGroup(this.player);
 
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
@@ -76,7 +73,7 @@ export class GameDirector {
         return playerGroup;
     }
 
-    private createBackground(): Box {
+    private createFloor(): Box {
         const parameters: TBox = {
             width: 20,
             height: 0.5,
@@ -99,7 +96,6 @@ export class GameDirector {
         // this.cube.rotation.y += 0.01;
         // this.light.translateX(-0.01);
         this.moveController.update();
-        // this.controls.update();
         this.renderer.render(this.scene, this.camera);
     }
 }
