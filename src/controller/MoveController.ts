@@ -1,7 +1,7 @@
 import gsap from "gsap";
 import { Box } from "../elements/Box";
 import { PromiseUtils } from '../utils/PromiseUtils';
-import { KeyType } from "../types/Types";
+import { KeyType, TMoveKeys } from "../types/Types";
 import { singleton } from "tsyringe";
 import { Group } from "three";
 
@@ -11,8 +11,14 @@ export class MoveController {
     private boxex: Array<Box> = [];
     private playerGroup!: Group;
     private personBox!: Box;
-    private readonly moveSpeed: number = 0.2;
+    private readonly moveSpeed: number = 0.05;
     private readonly sensitivity = 0.002;
+    private readonly moveKeys: TMoveKeys = {
+        [KeyType.FORWARD]: false,
+        [KeyType.BACK]: false,
+        [KeyType.LEFT]: false,
+        [KeyType.RIGHT]: false
+    };
 
     constructor(private groundPositionY: number) {
         this.init();
@@ -21,6 +27,12 @@ export class MoveController {
     private init() {
         window.addEventListener("keydown", (event: KeyboardEvent) => {
             this.onKey(event);
+        });
+        window.addEventListener("keydown", (event: KeyboardEvent) => {
+            this.moveKeys[event.code as KeyType] = true;
+        });
+        window.addEventListener("keyup", (event: KeyboardEvent) => {
+            this.moveKeys[event.code as KeyType] = false;
         });
     }
 
@@ -32,7 +44,7 @@ export class MoveController {
         const tl = gsap.timeline();
         tl.to(box.position, {
             y: this.groundPositionY + box.getHeight() / 2,
-            duration: 0.3,
+            duration: 0.25,
             ease: "power2.in",
             onComplete: () => {
                 box.setOnGround(true);
@@ -46,7 +58,7 @@ export class MoveController {
         box.setPromiseGravity(promiseGravity);
         tl.to(box.position, {
             y: this.groundPositionY + box.getHeight() / 2,
-            duration: 0.3,
+            duration: 0.25,
             ease: "power2.in",
             onUpdate: () => {
                 if (tl.progress() > 0.95) {
@@ -67,6 +79,26 @@ export class MoveController {
                 this.applyGravity(box);
             }
         });
+        this.keysListener();
+    }
+
+    private keysListener() {
+        switch (true) {
+            case this.moveKeys[KeyType.FORWARD] === true:
+                this.playerGroup.translateZ(-this.moveSpeed);
+                break;
+            case this.moveKeys[KeyType.BACK] === true:
+                this.playerGroup.translateZ(this.moveSpeed);
+                break;
+            case this.moveKeys[KeyType.LEFT] === true:
+                this.playerGroup.translateX(-this.moveSpeed);
+                break;
+            case this.moveKeys[KeyType.RIGHT] === true:
+                this.playerGroup.translateX(this.moveSpeed);
+                break;
+            default:
+                break;
+        }
     }
 
     public setPlayerGroup(player: Group) {
@@ -89,18 +121,6 @@ export class MoveController {
     public onKey(e: KeyboardEvent) {
         console.log(e.code);
         switch (e.code) {
-            case KeyType.BACK:
-                this.playerGroup.translateZ(this.moveSpeed);
-                break;
-            case KeyType.RIGHT:
-                this.playerGroup.translateX(this.moveSpeed);
-                break;
-            case KeyType.LEFT:
-                this.playerGroup.translateX(-this.moveSpeed);
-                break;
-            case KeyType.FORWARD:
-                this.playerGroup.translateZ(-this.moveSpeed);
-                break;
             case KeyType.JUMP:
                 this.personBox.jump();
                 break;

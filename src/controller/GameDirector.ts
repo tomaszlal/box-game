@@ -1,13 +1,18 @@
 import {
     BoxGeometry,
+    CameraHelper,
     DirectionalLight,
+    DoubleSide,
     Group,
+    Mesh,
     MeshStandardMaterial,
     PerspectiveCamera,
+    PlaneGeometry,
+    RepeatWrapping,
     Scene,
+    TextureLoader,
     WebGLRenderer
 } from "three";
-// import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GameDirectionalLight } from "../view/GameDirectionalLight";
 import { Box } from "../elements/Box";
 import { TBox } from '../types/Types';
@@ -17,8 +22,7 @@ import { MoveController } from "./MoveController";
 export class GameDirector {
     private camera: PerspectiveCamera;
     private player!: Group;
-    // private cube: Box;
-    private floor: Box;
+    private floor: Mesh;
     private light: DirectionalLight;
     private moveController: MoveController;
 
@@ -29,12 +33,15 @@ export class GameDirector {
         this.camera = this.createCamera();
         this.light = new GameDirectionalLight(0xffffff, 1);
         this.scene.add(this.light);
+        //TODO: Only for debugging shadow camera
+        const helper = new CameraHelper(this.light.shadow.camera);
+        this.scene.add(helper);
 
         this.player = this.createCharacterCube(this.camera);
         this.scene.add(this.player);
         this.floor = this.createFloor();
         this.scene.add(this.floor);
-        this.moveController = new MoveController(this.floor.getPickPositionY());
+        this.moveController = new MoveController(this.floor.position.y);
         this.moveController.setPlayerGroup(this.player);
 
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
@@ -44,7 +51,7 @@ export class GameDirector {
     private createCamera(): PerspectiveCamera {
         const camera = new PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
         // Position the camera
-        camera.position.z = 3;
+        camera.position.z = 3.5;
         camera.position.x = 0.5;
         camera.position.y = 2.5;
         return camera;
@@ -73,14 +80,30 @@ export class GameDirector {
         return playerGroup;
     }
 
-    private createFloor(): Box {
-        const parameters: TBox = {
-            width: 20,
-            height: 0.5,
-            depth: 20,
-            color: 0xffffff
-        };
-        return this.createBoxElement(parameters);
+    //TODO: refactor to separate class
+    private createFloor() {
+        const planeGeometry = new PlaneGeometry(100, 100);
+        const planeMaterial = new MeshStandardMaterial({
+            color: 0xffffff,
+            side: DoubleSide
+        });
+
+        const textureLoader = new TextureLoader();
+        const grassTexture = textureLoader.load("/src/assets/grass.jpg");
+        grassTexture.wrapS = RepeatWrapping;
+        grassTexture.wrapT = RepeatWrapping;
+        grassTexture.repeat.set(10, 10);
+        const grassMaterial = new MeshStandardMaterial({
+            map: grassTexture,
+            side: DoubleSide
+        });
+
+        const floor = new Mesh(planeGeometry, grassMaterial);
+        // const floor = new Mesh(planeGeometry, planeMaterial);
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.y = 0;
+        floor.receiveShadow = true;
+        return floor;
     }
 
     private onWindowResize(): void {

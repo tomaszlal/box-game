@@ -29,7 +29,7 @@ export class Box extends Mesh {
         const jumpHeight = this.position.y + height;
         tl.to(this.position, {
             y: jumpHeight,
-            duration: 0.2,
+            duration: 0.15,
             ease: "power2.out",
             onComplete: () => {
                 this.onGround = false;
@@ -55,10 +55,6 @@ export class Box extends Mesh {
 
     public setOnGround(onGround: boolean): void {
         this.onGround = onGround;
-    }
-
-    public isCanJump(): boolean {
-        return this.canJump;
     }
 
     public setCanJump(canJump: boolean): void {

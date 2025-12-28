@@ -7,10 +7,14 @@ export type TBox = {
     color: ColorRepresentation;
 }
 
-export enum KeyType{
+export enum KeyType {
     FORWARD = "KeyW",
     BACK = "KeyS",
     LEFT = "KeyA",
     RIGHT = "KeyD",
     JUMP = "Space"
+}
+
+export type TMoveKeys = {
+    [key in KeyType]?: boolean;
 }
