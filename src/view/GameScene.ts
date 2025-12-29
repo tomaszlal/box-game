@@ -1,5 +1,7 @@
 import { Color, Scene } from "three";
+import { singleton } from "tsyringe";
 
+@singleton()
 export class GameScene extends Scene {
 
     constructor() {

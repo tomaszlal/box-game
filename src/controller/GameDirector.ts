@@ -4,48 +4,63 @@ import {
     DirectionalLight,
     DoubleSide,
     Group,
+    HemisphereLight,
     Mesh,
     MeshStandardMaterial,
     PerspectiveCamera,
     PlaneGeometry,
     RepeatWrapping,
     Scene,
-    TextureLoader,
-    WebGLRenderer
+    TextureLoader
 } from "three";
 import { GameDirectionalLight } from "../view/GameDirectionalLight";
 import { Box } from "../elements/Box";
 import { TBox } from '../types/Types';
 import { MoveController } from "./MoveController";
-
+import { Floor } from "../elements/Floor";
+import { Character } from "../elements/Character";
+import { GameScene } from "../view/GameScene";
+import { container } from "tsyringe";
+import { GameRenderer } from "../view/GameRenderer";
 
 export class GameDirector {
     private camera: PerspectiveCamera;
     private player!: Group;
-    private floor: Mesh;
+    private floor: Floor;
     private light: DirectionalLight;
     private moveController: MoveController;
+    private scene!: GameScene;
+    private renderer!: GameRenderer;
 
-    constructor(
-        private scene: Scene,
-        private renderer: WebGLRenderer
-    ) {
+    constructor() {
+        this.resolveDependencies();
         this.camera = this.createCamera();
-        this.light = new GameDirectionalLight(0xffffff, 1);
+        this.light = new GameDirectionalLight(0xffffff, 3.14);
         this.scene.add(this.light);
+
+        // const hemiLight = new HemisphereLight(0xffffff, 0x444444, 2); // Sky color, Ground color, Intensity
+        // hemiLight.position.set(0, 20, 0);
+        // this.scene.add(hemiLight)
+
         //TODO: Only for debugging shadow camera
         const helper = new CameraHelper(this.light.shadow.camera);
         this.scene.add(helper);
 
         this.player = this.createCharacterCube(this.camera);
         this.scene.add(this.player);
-        this.floor = this.createFloor();
+        this.floor = new Floor(100, "/src/assets/grass.jpg");
         this.scene.add(this.floor);
         this.moveController = new MoveController(this.floor.position.y);
         this.moveController.setPlayerGroup(this.player);
 
+        new Character();
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
         this.animate();
+    }
+
+    private resolveDependencies() {
+        this.scene = container.resolve(GameScene);
+        this.renderer = container.resolve(GameRenderer);
     }
 
     private createCamera(): PerspectiveCamera {
@@ -78,32 +93,6 @@ export class GameDirector {
         playerGroup.add(cube);
         playerGroup.add(camera);
         return playerGroup;
-    }
-
-    //TODO: refactor to separate class
-    private createFloor() {
-        const planeGeometry = new PlaneGeometry(100, 100);
-        const planeMaterial = new MeshStandardMaterial({
-            color: 0xffffff,
-            side: DoubleSide
-        });
-
-        const textureLoader = new TextureLoader();
-        const grassTexture = textureLoader.load("/src/assets/grass.jpg");
-        grassTexture.wrapS = RepeatWrapping;
-        grassTexture.wrapT = RepeatWrapping;
-        grassTexture.repeat.set(10, 10);
-        const grassMaterial = new MeshStandardMaterial({
-            map: grassTexture,
-            side: DoubleSide
-        });
-
-        const floor = new Mesh(planeGeometry, grassMaterial);
-        // const floor = new Mesh(planeGeometry, planeMaterial);
-        floor.rotation.x = -Math.PI / 2;
-        floor.position.y = 0;
-        floor.receiveShadow = true;
-        return floor;
     }
 
     private onWindowResize(): void {

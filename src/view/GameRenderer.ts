@@ -1,5 +1,7 @@
 import { WebGLRenderer } from "three";
+import { singleton } from "tsyringe";
 
+@singleton()
 export class GameRenderer extends WebGLRenderer {
 
     constructor() {
