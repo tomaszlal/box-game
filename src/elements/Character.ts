@@ -24,10 +24,20 @@ export class Character {
                     // Optional fix if metalness is wrong
                     //@ts-ignore
                     // child.material.metalness = 0;
-                    // //@ts-ignore
+                    //@ts-ignore
                     // child.material.roughness = 1;
                     //@ts-ignore
-                    child.material.color = { r: 0.8, g: 0.5, b: 0.2, iscolor: true };
+                    // child.material.color = { r: 0.8, g: 0.5, b: 0.2, iscolor: true };
+                    //@ts-ignore
+                    if (child.material.color) {
+                        //@ts-ignore
+                        child.material.color.r *= 10;
+                        //@ts-ignore
+                        child.material.color.g *= 10;
+                        //@ts-ignore
+                        child.material.color.b *= 10;
+                    }
+
                 }
             });
 
@@ -38,6 +48,13 @@ export class Character {
 
 
 
+        });
+
+        this.loader.load("/src/assets/things/Barrel.glb" , (gltf) => {
+            const barrel = gltf.scene;
+            barrel.scale.set(5,5,5);
+            barrel.position.set(2,0,0);
+            this.gameScene.add(barrel);
         });
     }
 

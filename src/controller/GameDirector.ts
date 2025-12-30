@@ -35,10 +35,10 @@ export class GameDirector {
     constructor() {
         this.resolveDependencies();
         this.camera = this.createCamera();
-        this.light = new GameDirectionalLight(0xffffff, 3.14);
+        this.light = new GameDirectionalLight(0xffffff, 1);
         this.scene.add(this.light);
 
-        // const hemiLight = new HemisphereLight(0xffffff, 0x444444, 2); // Sky color, Ground color, Intensity
+        // const hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.5); // Sky color, Ground color, Intensity
         // hemiLight.position.set(0, 20, 0);
         // this.scene.add(hemiLight)
 
