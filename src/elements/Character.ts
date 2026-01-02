@@ -1,4 +1,4 @@
-import { GLTFLoader } from "three/examples/jsm/Addons.js";
+import { GLTF, GLTFLoader } from "three/examples/jsm/Addons.js";
 import { container } from "tsyringe";
 import { GameScene } from '../view/GameScene';
 import { MeshStandardMaterial } from "three";
@@ -16,30 +16,31 @@ export class Character {
         this.loader.load(this.path, (gltf) => {
 
 
-            // debugger;
-            gltf.scene.traverse((child) => {
-                //@ts-ignore
-                if (child.isMesh && child.material instanceof MeshStandardMaterial) {
-                    // debugger;
-                    // Optional fix if metalness is wrong
-                    //@ts-ignore
-                    // child.material.metalness = 0;
-                    //@ts-ignore
-                    // child.material.roughness = 1;
-                    //@ts-ignore
-                    // child.material.color = { r: 0.8, g: 0.5, b: 0.2, iscolor: true };
-                    //@ts-ignore
-                    if (child.material.color) {
-                        //@ts-ignore
-                        child.material.color.r *= 10;
-                        //@ts-ignore
-                        child.material.color.g *= 10;
-                        //@ts-ignore
-                        child.material.color.b *= 10;
-                    }
+            this.correctColor(gltf);
+            // // debugger;
+            // gltf.scene.traverse((child) => {
+            //     //@ts-ignore
+            //     if (child.isMesh && child.material instanceof MeshStandardMaterial) {
+            //         // debugger;
+            //         // Optional fix if metalness is wrong
+            //         //@ts-ignore
+            //         // child.material.metalness = 0;
+            //         //@ts-ignore
+            //         // child.material.roughness = 1;
+            //         //@ts-ignore
+            //         // child.material.color = { r: 0.8, g: 0.5, b: 0.2, iscolor: true };
+            //         //@ts-ignore
+            //         // if (child.material.color) {
+            //         //     //@ts-ignore
+            //         //     child.material.color.r *= 10;
+            //         //     //@ts-ignore
+            //         //     child.material.color.g *= 10;
+            //         //     //@ts-ignore
+            //         //     child.material.color.b *= 10;
+            //         // }
 
-                }
-            });
+            //     }
+            // });
 
 
             this.model = gltf.scene;
@@ -50,11 +51,41 @@ export class Character {
 
         });
 
-        this.loader.load("/src/assets/things/Barrel.glb" , (gltf) => {
+        // this.loader.load("/src/assets/things/Barrel.glb", (gltf) => {
+        //     const barrel = gltf.scene;
+        //     barrel.scale.set(5, 5, 5);
+        //     barrel.position.set(2, 0, 0);
+
+        //     this.correctColor(gltf);
+
+        //     this.gameScene.add(barrel);
+        // });
+         this.loader.load("/src/assets/characters/Male_survivor_1.glb", (gltf) => {
             const barrel = gltf.scene;
-            barrel.scale.set(5,5,5);
-            barrel.position.set(2,0,0);
+            // barrel.scale.set(5, 5, 5);
+            barrel.position.set(2, 0, 0);
+
+            // this.correctColor(gltf);
+
             this.gameScene.add(barrel);
+        });
+    }
+
+    private correctColor(gltf: GLTF) {
+        gltf.scene.traverse((child) => {
+            // @ts-ignore
+            if (child.isMesh && child.material instanceof MeshStandardMaterial) {
+                //@ts-ignore
+                if (child.material.color) {
+                    //@ts-ignore
+                    child.material.color.r *= 10;
+                    //@ts-ignore
+                    child.material.color.g *= 10;
+                    //@ts-ignore
+                    child.material.color.b *= 10;
+                }
+
+            }
         });
     }
 
