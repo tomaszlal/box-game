@@ -1,14 +1,15 @@
 import { GLTF, GLTFLoader } from "three/examples/jsm/Addons.js";
 import { container } from "tsyringe";
 import { GameScene } from '../view/GameScene';
-import { MeshStandardMaterial } from "three";
+import { AnimationMixer, Group, MeshStandardMaterial, Object3DEventMap } from "three";
 
 export class Character {
 
     private path: string = "/src/assets/characters/Adventurer.glb";
     private loader: GLTFLoader
     private gameScene!: GameScene;
-    private model: any;
+    private model!: Group<Object3DEventMap>;
+    mixer: any;
 
     constructor() {
         this.loader = new GLTFLoader();
@@ -44,7 +45,15 @@ export class Character {
 
 
             this.model = gltf.scene;
+           if (gltf.animations && gltf.animations.length > 0) {
+                this.mixer = new AnimationMixer(this.model);
+                const action = this.mixer.clipAction(gltf.animations[5]);
+                action.loop = 1;
+                action.play();
+            }
             this.model.position.set(0, 0, 0);
+
+            // return this.model
             this.gameScene.add(this.model);
 
 
@@ -60,15 +69,15 @@ export class Character {
 
         //     this.gameScene.add(barrel);
         // });
-         this.loader.load("/src/assets/characters/Male_survivor_1.glb", (gltf) => {
-            const barrel = gltf.scene;
-            // barrel.scale.set(5, 5, 5);
-            barrel.position.set(2, 0, 0);
+        //  this.loader.load("/src/assets/characters/Male_survivor_1.glb", (gltf) => {
+        //     const barrel = gltf.scene;
+        //     // barrel.scale.set(5, 5, 5);
+        //     barrel.position.set(2, 0, 0);
 
-            // this.correctColor(gltf);
+        //     // this.correctColor(gltf);
 
-            this.gameScene.add(barrel);
-        });
+        //     this.gameScene.add(barrel);
+        // });
     }
 
     private correctColor(gltf: GLTF) {
