@@ -1,15 +1,15 @@
 import { GLTF, GLTFLoader } from "three/examples/jsm/Addons.js";
 import { container } from "tsyringe";
 import { GameScene } from '../view/GameScene';
-import { AnimationMixer, Group, MeshStandardMaterial, Object3DEventMap } from "three";
+import { AnimationMixer, Group, LoopRepeat, MeshStandardMaterial, Object3DEventMap } from "three";
 
 export class Character {
 
-    private path: string = "/src/assets/characters/Adventurer.glb";
+    private path: string = "/src/assets/characters/urban_teen_run.glb";
     private loader: GLTFLoader
     private gameScene!: GameScene;
     private model!: Group<Object3DEventMap>;
-    mixer: any;
+    private mixer!: AnimationMixer;
 
     constructor() {
         this.loader = new GLTFLoader();
@@ -45,13 +45,14 @@ export class Character {
 
 
             this.model = gltf.scene;
-           if (gltf.animations && gltf.animations.length > 0) {
+            if (gltf.animations && gltf.animations.length > 0) {
                 this.mixer = new AnimationMixer(this.model);
-                const action = this.mixer.clipAction(gltf.animations[5]);
-                action.loop = 1;
+                const action = this.mixer.clipAction(gltf.animations[0]);
+                // action.setLoop(LoopRepeat, Infinity);
                 action.play();
+
             }
-            this.model.position.set(0, 0, 0);
+            this.model.position.set(0, 1, 0);
 
             // return this.model
             this.gameScene.add(this.model);
@@ -59,6 +60,9 @@ export class Character {
 
 
         });
+
+
+
 
         // this.loader.load("/src/assets/things/Barrel.glb", (gltf) => {
         //     const barrel = gltf.scene;
@@ -100,5 +104,10 @@ export class Character {
 
     private resolveDependencies() {
         this.gameScene = container.resolve(GameScene);
+    }
+
+    public update() {
+        // const delta = clock.getDelta();
+        this.mixer.update(0.016); // assuming 60 FPS, so ~16ms per frame
     }
 }

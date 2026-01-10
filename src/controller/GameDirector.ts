@@ -31,6 +31,7 @@ export class GameDirector {
     private moveController: MoveController;
     private scene!: GameScene;
     private renderer!: GameRenderer;
+    private character: Character;
 
     constructor() {
         this.resolveDependencies();
@@ -53,7 +54,7 @@ export class GameDirector {
         this.moveController = new MoveController(this.floor.position.y);
         this.moveController.setPlayerGroup(this.player);
 
-        new Character();
+        this.character = new Character();
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
         this.animate();
     }
@@ -108,6 +109,7 @@ export class GameDirector {
         // this.cube.rotation.y += 0.01;
         // this.light.translateX(-0.01);
         this.moveController.update();
+        this.character.update();
         this.renderer.render(this.scene, this.camera);
     }
 }
