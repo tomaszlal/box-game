@@ -10,7 +10,7 @@ export class MoveController {
 
     private boxex: Array<Box> = [];
     private playerGroup!: Group;
-    private personBox!: Box;
+    private player!: Group;
     private readonly moveSpeed: number = 0.05;
     private readonly sensitivity = 0.002;
     private readonly moveKeys: TMoveKeys = {
@@ -71,9 +71,9 @@ export class MoveController {
     }
 
     public update(): void {
-        if (this.personBox && !this.personBox.isOnGround()) {
-            this.applyGravityForPersonBox(this.personBox);
-        }
+        // if (this.player && !this.player.isOnGround()) {
+        //     this.applyGravityForPersonBox(this.player);
+        // }
         this.boxex.forEach((box) => {
             if (!box.isOnGround()) {
                 this.applyGravity(box);
@@ -103,8 +103,16 @@ export class MoveController {
 
     public setPlayerGroup(player: Group) {
         this.playerGroup = player;
-        this.personBox = this.playerGroup.children[0] as Box;
+   
+        this.player = this.playerGroup.children[0] as Group;
+        //      debugger;
         this.addMouseEventControl();
+    }
+
+    public setPlayerCharacterGroup(player: Group) {
+        // this.playerGroup = player;
+        // this.personBox = this.playerGroup.children[0] as Box;
+        // this.addMouseEventControl();
     }
 
     private addMouseEventControl() {
@@ -122,7 +130,7 @@ export class MoveController {
         console.log(e.code);
         switch (e.code) {
             case KeyType.JUMP:
-                this.personBox.jump();
+                // this.player.jump();
                 break;
             default:
                 break;
