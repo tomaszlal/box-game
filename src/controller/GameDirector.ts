@@ -51,11 +51,13 @@ export class GameDirector {
         this.scene.add(helper);
 
         this.player = await this.createCharacter(this.camera);
+        // debugger
+        // this.character.play();
         // this.scene.add(this.player);
         this.floor = new Floor(100, "/src/assets/grass.jpg");
         this.scene.add(this.floor);
         this.moveController = new MoveController(this.floor.position.y);
-        this.moveController.setPlayerGroup(this.player);
+        this.moveController.setPlayerCharacter(this.player, this.character);
         // this.character = new Character();
         // this.createCharacter(this.camera);
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
@@ -106,12 +108,6 @@ export class GameDirector {
         playerGroup.add(this.character.model);
         playerGroup.add(camera);
 
-        // const playerGroup = new Group();
-        // this.scene.add(playerGroup);
-        // const cube = this.createBoxElement(cubeParameters);
-        // cube.position.y = 5
-        // playerGroup.add(cube);
-        // playerGroup.add(camera);
         return playerGroup;
     }
 
@@ -128,7 +124,7 @@ export class GameDirector {
         // this.cube.rotation.y += 0.01;
         // this.light.translateX(-0.01);
         this.moveController.update();
-        // this.character.update();
+        this.character.update();
         this.renderer.render(this.scene, this.camera);
     }
 }

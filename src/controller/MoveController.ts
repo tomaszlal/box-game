@@ -4,6 +4,7 @@ import { PromiseUtils } from '../utils/PromiseUtils';
 import { KeyType, TMoveKeys } from "../types/Types";
 import { singleton } from "tsyringe";
 import { Group } from "three";
+import { Character } from '../elements/Character';
 
 @singleton()
 export class MoveController {
@@ -11,6 +12,7 @@ export class MoveController {
     private boxex: Array<Box> = [];
     private playerGroup!: Group;
     private player!: Group;
+    private character!: Character;
     private readonly moveSpeed: number = 0.05;
     private readonly sensitivity = 0.002;
     private readonly moveKeys: TMoveKeys = {
@@ -70,10 +72,28 @@ export class MoveController {
         });
     }
 
+    private async applyGravityForPerson(player: Character): Promise<void> {
+        const tl = gsap.timeline();
+        const promiseGravity = PromiseUtils.getResolvablePromise<void>();
+        player.setPromiseGravity(promiseGravity);
+        tl.to(player.model.position, {
+            y: this.groundPositionY,
+            duration: 0.25,
+            ease: "power2.in",
+            onUpdate: () => {
+                if (tl.progress() > 0.95) {
+                    promiseGravity.resolve();
+                    player.setOnGround(true);
+                    player.setCanJump(true);
+                }
+            },
+        });
+    }
+
     public update(): void {
-        // if (this.player && !this.player.isOnGround()) {
-        //     this.applyGravityForPersonBox(this.player);
-        // }
+        if (this.character && !this.character.isOnGround()) {
+            this.applyGravityForPerson(this.character);
+        }
         this.boxex.forEach((box) => {
             if (!box.isOnGround()) {
                 this.applyGravity(box);
@@ -101,18 +121,11 @@ export class MoveController {
         }
     }
 
-    public setPlayerGroup(player: Group) {
-        this.playerGroup = player;
-   
-        this.player = this.playerGroup.children[0] as Group;
-        //      debugger;
+    public setPlayerCharacter(playerGroup: Group, character: Character) {
+        this.playerGroup = playerGroup;
+        this.character = character;
+        this.player = character.model;
         this.addMouseEventControl();
-    }
-
-    public setPlayerCharacterGroup(player: Group) {
-        // this.playerGroup = player;
-        // this.personBox = this.playerGroup.children[0] as Box;
-        // this.addMouseEventControl();
     }
 
     private addMouseEventControl() {
@@ -130,7 +143,7 @@ export class MoveController {
         console.log(e.code);
         switch (e.code) {
             case KeyType.JUMP:
-                // this.player.jump();
+                this.character.jump();
                 break;
             default:
                 break;
