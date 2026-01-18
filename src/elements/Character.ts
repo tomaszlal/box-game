@@ -1,7 +1,8 @@
 import { GLTF, GLTFLoader } from "three/examples/jsm/Addons.js";
-import { AnimationMixer, Box3, Group, MeshStandardMaterial, Object3DEventMap, Vector3 } from "three";
+import { AnimationAction, AnimationMixer, Box3, Group, MeshStandardMaterial, Object3DEventMap, Vector3 } from "three";
 import { PromiseUtils, ResolvablePromise } from "../utils/PromiseUtils";
 import gsap from "gsap";
+import { TimingUtils } from "../utils/TimingUtils";
 
 export class Character {
 
@@ -13,6 +14,7 @@ export class Character {
     private canJump: boolean = true;
     private promiseGravity: ResolvablePromise<void> = PromiseUtils.getResolvablePromise<void>();
     private onGround: boolean = false;
+    private currentAnimation!: AnimationAction;
 
     constructor() {
         this.init();
@@ -28,9 +30,8 @@ export class Character {
         this.model = this.gltf.scene;
         if (this.gltf.animations && this.gltf.animations.length > 0) {
             this.mixer = new AnimationMixer(this.model);
-            const action = this.mixer.clipAction(this.gltf.animations[9]);
-            // action.setLoop(LoopRepeat, Infinity);
-            // action.play();
+            this.currentAnimation = this.mixer.clipAction(this.gltf.animations[13]);
+            this.currentAnimation.play();
         }
         this.model.position.set(0, 5, 0);
         this.model.scale.set(0.1, 0.1, 0.1);
@@ -40,10 +41,16 @@ export class Character {
         return this;
     };
 
-    public play() {
+    public async play() {
         if (this.mixer) {
-            const action = this.mixer.clipAction(this.gltf.animations[9]);
+            const action = this.mixer.clipAction(this.gltf.animations[20]);
+            const clipDuration = action.getClip().duration; 
+            // debugger;
+
             action.play();
+            await TimingUtils.wait(clipDuration * 1000);
+            // action.reset();
+            action.stop();  
         }
     }
 
@@ -52,6 +59,7 @@ export class Character {
             console.log(`dont jump   jump:${this.canJump} on ground:${this.onGround}`);
             return;
         }
+        this.play();
         this.canJump = false;
         const tl = gsap.timeline();
         const jumpHeight = this.model.position.y + height;
@@ -74,7 +82,7 @@ export class Character {
     // });
 
     public update() {
-        this.mixer.update(0.016); // assuming 60 FPS, so ~16ms per frame
+        this.mixer.update(0.008); // assuming 60 FPS, so ~16ms per frame
     }
 
     private correctColor(gltf: GLTF) {

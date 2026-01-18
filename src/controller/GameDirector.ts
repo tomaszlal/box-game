@@ -119,9 +119,6 @@ export class GameDirector {
 
     private animate(): void {
         requestAnimationFrame(this.animate.bind(this));
-        // Animation logic: rotate the cube
-        // this.cube.rotation.x += 0.01;
-        // this.cube.rotation.y += 0.01;
         // this.light.translateX(-0.01);
         this.moveController.update();
         this.character.update();
