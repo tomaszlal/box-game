@@ -1,7 +1,7 @@
 import gsap from "gsap";
 import { Box } from "../elements/Box";
-import { PromiseUtils } from '../utils/PromiseUtils';
-import { KeyType, TMoveKeys } from "../types/Types";
+import { PromiseUtils, ResolvablePromise } from '../utils/PromiseUtils';
+import { CharacterAnimation, KeyType, TMoveKeys } from "../types/Types";
 import { singleton } from "tsyringe";
 import { Group } from "three";
 import { Character } from '../elements/Character';
@@ -13,14 +13,19 @@ export class MoveController {
     private playerGroup!: Group;
     private player!: Group;
     private character!: Character;
-    private readonly moveSpeed: number = 0.05;
+    private readonly moveSpeed: number = 0.01;
+    private currentMoveSpeed: number = this.moveSpeed;
+    private readonly sprintMultiplier = 2.5;
     private readonly sensitivity = 0.002;
     private readonly moveKeys: TMoveKeys = {
         [KeyType.FORWARD]: false,
         [KeyType.BACK]: false,
         [KeyType.LEFT]: false,
-        [KeyType.RIGHT]: false
+        [KeyType.RIGHT]: false,
+        [KeyType.LEFT_SHIFT]: false
     };
+    private keypressed!: ResolvablePromise<void> | undefined;
+
 
     constructor(private groundPositionY: number) {
         this.init();
@@ -99,24 +104,36 @@ export class MoveController {
                 this.applyGravity(box);
             }
         });
+        this.currentMoveSpeed = this.moveKeys[KeyType.LEFT_SHIFT] ? this.moveSpeed * this.sprintMultiplier : this.moveSpeed;
         this.keysListener();
     }
 
     private keysListener() {
+
         switch (true) {
             case this.moveKeys[KeyType.FORWARD] === true:
-                this.playerGroup.translateZ(-this.moveSpeed);
+                this.playerGroup.translateZ(-this.currentMoveSpeed);
+                if (!this.keypressed) {
+                    this.keypressed = PromiseUtils.getResolvablePromise<void>();
+                }
+                if (this.moveKeys[KeyType.LEFT_SHIFT]) {
+                    this.character.play(CharacterAnimation.RUN, this.keypressed);
+                } else {
+                    this.character.play(CharacterAnimation.WALK, this.keypressed);
+                }
                 break;
             case this.moveKeys[KeyType.BACK] === true:
-                this.playerGroup.translateZ(this.moveSpeed);
+                this.playerGroup.translateZ(this.currentMoveSpeed);
                 break;
             case this.moveKeys[KeyType.LEFT] === true:
-                this.playerGroup.translateX(-this.moveSpeed);
+                this.playerGroup.translateX(-this.currentMoveSpeed);
                 break;
             case this.moveKeys[KeyType.RIGHT] === true:
-                this.playerGroup.translateX(this.moveSpeed);
+                this.playerGroup.translateX(this.currentMoveSpeed);
                 break;
             default:
+                this.keypressed?.resolve();
+                this.keypressed = undefined;
                 break;
         }
     }
@@ -124,7 +141,7 @@ export class MoveController {
     public setPlayerCharacter(playerGroup: Group, character: Character) {
         this.playerGroup = playerGroup;
         this.character = character;
-        this.player = character.model;
+        // this.player = character.model;
         this.addMouseEventControl();
     }
 

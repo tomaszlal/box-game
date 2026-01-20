@@ -12,9 +12,17 @@ export enum KeyType {
     BACK = "KeyS",
     LEFT = "KeyA",
     RIGHT = "KeyD",
+    LEFT_SHIFT = "ShiftLeft",
     JUMP = "Space"
 }
 
 export type TMoveKeys = {
     [key in KeyType]?: boolean;
+}
+
+export enum CharacterAnimation {
+    IDLE = 13,
+    RUN = 27,
+    JUMP = 20,
+    WALK = 28
 }

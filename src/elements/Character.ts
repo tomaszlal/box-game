@@ -3,6 +3,7 @@ import { AnimationAction, AnimationMixer, Box3, Group, MeshStandardMaterial, Obj
 import { PromiseUtils, ResolvablePromise } from "../utils/PromiseUtils";
 import gsap from "gsap";
 import { TimingUtils } from "../utils/TimingUtils";
+import { CharacterAnimation } from "../types/Types";
 
 export class Character {
 
@@ -14,7 +15,9 @@ export class Character {
     private canJump: boolean = true;
     private promiseGravity: ResolvablePromise<void> = PromiseUtils.getResolvablePromise<void>();
     private onGround: boolean = false;
-    private currentAnimation!: AnimationAction;
+    private idleAnimation!: AnimationAction;
+    private currentRunningAnimation!: AnimationAction;
+    private currenAnimation!: CharacterAnimation | null;
 
     constructor() {
         this.init();
@@ -30,8 +33,8 @@ export class Character {
         this.model = this.gltf.scene;
         if (this.gltf.animations && this.gltf.animations.length > 0) {
             this.mixer = new AnimationMixer(this.model);
-            this.currentAnimation = this.mixer.clipAction(this.gltf.animations[13]);
-            this.currentAnimation.play();
+            this.idleAnimation = this.mixer.clipAction(this.gltf.animations[CharacterAnimation.IDLE]);
+            this.idleAnimation.play();
         }
         this.model.position.set(0, 5, 0);
         this.model.scale.set(0.1, 0.1, 0.1);
@@ -41,16 +44,39 @@ export class Character {
         return this;
     };
 
-    public async play() {
+    public async playJump() {
+        if (this.idleAnimation.isRunning()) {
+            this.idleAnimation.stop();
+        }
         if (this.mixer) {
-            const action = this.mixer.clipAction(this.gltf.animations[20]);
-            const clipDuration = action.getClip().duration; 
-            // debugger;
-
+            const action = this.mixer.clipAction(this.gltf.animations[CharacterAnimation.JUMP]);
+            const clipDuration = action.getClip().duration;
             action.play();
             await TimingUtils.wait(clipDuration * 1000);
-            // action.reset();
-            action.stop();  
+            action.stop();
+            this.idleAnimation.play();
+        }
+    }
+
+    public async play(animation: CharacterAnimation, keypressed: ResolvablePromise<void>) {
+        if (this.currenAnimation && this.currenAnimation === animation) {
+            return;
+        }
+        if (this.currentRunningAnimation?.isRunning()) {
+            this.currentRunningAnimation.stop();
+        }
+        if (this.idleAnimation.isRunning()) {
+            this.idleAnimation.stop();
+        }
+        this.currenAnimation = animation;
+        if (this.mixer) {
+            this.currentRunningAnimation = this.mixer.clipAction(this.gltf.animations[animation]);
+            const clipDuration = this.currentRunningAnimation.getClip().duration;
+            this.currentRunningAnimation.play();
+            await Promise.race([TimingUtils.wait(clipDuration * 1000), keypressed]);
+            this.currentRunningAnimation.stop();
+            this.idleAnimation.play();
+            this.currenAnimation = null
         }
     }
 
@@ -59,7 +85,7 @@ export class Character {
             console.log(`dont jump   jump:${this.canJump} on ground:${this.onGround}`);
             return;
         }
-        this.play();
+        this.playJump();
         this.canJump = false;
         const tl = gsap.timeline();
         const jumpHeight = this.model.position.y + height;
@@ -82,7 +108,8 @@ export class Character {
     // });
 
     public update() {
-        this.mixer.update(0.008); // assuming 60 FPS, so ~16ms per frame
+        // this.mixer.update(0.008); // assuming 60 FPS, so ~16ms per frame
+        this.mixer.update(0.016); // assuming 60 FPS, so ~16ms per frame
     }
 
     private correctColor(gltf: GLTF) {

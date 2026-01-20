@@ -84,6 +84,7 @@ export class GameDirector {
         return cube;
     }
 
+    //TODO: Remove this method nod needed anymore
     private createCharacterCube(camera: PerspectiveCamera): Group {
         const cubeParameters: TBox = {
             width: 1,
@@ -105,6 +106,7 @@ export class GameDirector {
 
         const playerGroup = new Group();
         this.scene.add(playerGroup);
+        this.character.model.rotation.y = Math.PI; // Rotate 180 degrees to face the camera
         playerGroup.add(this.character.model);
         playerGroup.add(camera);
 

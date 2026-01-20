@@ -7,4 +7,8 @@ export class TimingUtils {
             }, ms);
         });
     }
+
+    public static async delay(seconds: number): Promise<void> {
+        return TimingUtils.wait(seconds * 1000);
+    }
 }
