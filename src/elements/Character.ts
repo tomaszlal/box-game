@@ -10,7 +10,7 @@ export class Character {
     private path: string = "/src/assets/characters/knight_GTLF.glb";
     private loader!: GLTFLoader
     public model!: Group<Object3DEventMap>;
-    public mixer!: AnimationMixer;
+    private mixer!: AnimationMixer;
     private gltf!: GLTF;
     private canJump: boolean = true;
     private promiseGravity: ResolvablePromise<void> = PromiseUtils.getResolvablePromise<void>();
@@ -52,7 +52,7 @@ export class Character {
             const action = this.mixer.clipAction(this.gltf.animations[CharacterAnimation.JUMP]);
             const clipDuration = action.getClip().duration;
             action.play();
-            await TimingUtils.wait(clipDuration * 1000);
+            await TimingUtils.delayMS(clipDuration * 1000);
             action.stop();
             this.idleAnimation.play();
         }
@@ -73,7 +73,7 @@ export class Character {
             this.currentRunningAnimation = this.mixer.clipAction(this.gltf.animations[animation]);
             const clipDuration = this.currentRunningAnimation.getClip().duration;
             this.currentRunningAnimation.play();
-            await Promise.race([TimingUtils.wait(clipDuration * 1000), keypressed]);
+            await Promise.race([TimingUtils.delayMS(clipDuration * 1000), keypressed]);
             this.currentRunningAnimation.stop();
             this.idleAnimation.play();
             this.currenAnimation = null
@@ -89,6 +89,8 @@ export class Character {
         this.canJump = false;
         const tl = gsap.timeline();
         const jumpHeight = this.model.position.y + height;
+
+        // this.getHeight();
         tl.to(this.model.position, {
             y: jumpHeight,
             duration: 0.15,
@@ -141,7 +143,9 @@ export class Character {
 
     public getHeight() {
         const box = new Box3().setFromObject(this.model);
+
         const size = new Vector3();
+        // debugger;
         box.getSize(size);
         return size.y;
     }

@@ -1,6 +1,6 @@
 export class TimingUtils {
 
-    public static async wait(ms: number): Promise<void> {
+    public static async delayMS(ms: number): Promise<void> {
         return new Promise((resolve) => {
             setTimeout(() => {
                 resolve();
@@ -8,7 +8,7 @@ export class TimingUtils {
         });
     }
 
-    public static async delay(seconds: number): Promise<void> {
-        return TimingUtils.wait(seconds * 1000);
+    public static async delayS(seconds: number): Promise<void> {
+        return TimingUtils.delayMS(seconds * 1000);
     }
 }

@@ -46,20 +46,37 @@ export class GameDirector {
         // const hemiLight = new HemisphereLight(0xffffff, 0x444444, 0.5); // Sky color, Ground color, Intensity
         // hemiLight.position.set(0, 20, 0);
         // this.scene.add(hemiLight)
-        //TODO: Only for debugging shadow camera
-        const helper = new CameraHelper(this.light.shadow.camera);
-        this.scene.add(helper);
 
-        this.player = await this.createCharacter(this.camera);
-        // debugger
-        // this.character.play();
-        // this.scene.add(this.player);
+        //TODO: Only for debugging shadow camera
+        // const helper = new CameraHelper(this.light.shadow.camera);
+        // this.scene.add(helper);
         this.floor = new Floor(100, "/src/assets/grass.jpg");
         this.scene.add(this.floor);
+
+
         this.moveController = new MoveController(this.floor.position.y);
+
+
+
+        this.player = await this.createCharacter(this.camera);
+
         this.moveController.setPlayerCharacter(this.player, this.character);
-        // this.character = new Character();
-        // this.createCharacter(this.camera);
+
+        const cube = this.createCube();
+        cube.position.set(0, 0.5, -5);
+        this.scene.add(cube);
+        this.moveController.addElementsForGravity(cube);
+
+        const cube2 = this.createCube();
+        cube2.position.set(2, 0.5, -5);
+        this.scene.add(cube2);
+        this.moveController.addElementsForGravity(cube2);
+
+        const cube3 = this.createCube();
+        cube3.position.set(-2, 0.5, -5);
+        this.scene.add(cube3);
+        this.moveController.addElementsForGravity(cube3);
+
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
         this.animate();
     }
@@ -85,7 +102,7 @@ export class GameDirector {
     }
 
     //TODO: Remove this method nod needed anymore
-    private createCharacterCube(camera: PerspectiveCamera): Group {
+    private createCube(): Box {
         const cubeParameters: TBox = {
             width: 1,
             height: 1,
@@ -94,11 +111,7 @@ export class GameDirector {
         };
         const playerGroup = new Group();
         this.scene.add(playerGroup);
-        const cube = this.createBoxElement(cubeParameters);
-        cube.position.y = 5
-        playerGroup.add(cube);
-        playerGroup.add(camera);
-        return playerGroup;
+        return this.createBoxElement(cubeParameters);
     }
 
     private async createCharacter(camera: PerspectiveCamera): Promise<Group> {
