@@ -1,4 +1,4 @@
-import { BoxGeometry, Mesh, MeshStandardMaterial } from "three";
+import { Box3, BoxGeometry, Mesh, MeshStandardMaterial } from "three";
 import gsap from "gsap";
 import { PromiseUtils, ResolvablePromise } from "../utils/PromiseUtils";
 
@@ -39,6 +39,10 @@ export class Box extends Mesh {
 
     public getHeight(): number {
         return (this.geometry as BoxGeometry).parameters.height;
+    }
+
+    public getBox(): Box3 {
+        return new Box3().setFromObject(this);
     }
 
     public getBasePositionY(): number {

@@ -9,7 +9,7 @@ import { Character } from '../elements/Character';
 @singleton()
 export class MoveController {
 
-    private boxex: Array<Box> = [];
+    private boxes: Array<Box> = [];
     private playerGroup!: Group;
     private player!: Group;
     private character!: Character;
@@ -44,7 +44,7 @@ export class MoveController {
     }
 
     public addElementsForGravity(box: Box): void {
-        this.boxex.push(box);
+        this.boxes.push(box);
     }
 
     private async applyGravity(box: Box): Promise<void> {
@@ -99,7 +99,7 @@ export class MoveController {
         if (this.character && !this.character.isOnGround()) {
             this.applyGravityForPerson(this.character);
         }
-        this.boxex.forEach((box) => {
+        this.boxes.forEach((box) => {
             if (!box.isOnGround()) {
                 this.applyGravity(box);
             }
@@ -127,6 +127,14 @@ export class MoveController {
                 break;
             case this.moveKeys[KeyType.LEFT] === true:
                 this.playerGroup.translateX(-this.currentMoveSpeed);
+                const kupaBox = this.character.getBox();
+                console.log('kupaBox', kupaBox);
+                const kupaBoxes0 = this.boxes[0].getBox();
+                console.log('kupaBoxes0', kupaBoxes0);
+                if (kupaBox.intersectsBox(kupaBoxes0)) {
+                    console.log("Collision detected!");
+                    // Logic to stop movement or bounce back
+                }
                 break;
             case this.moveKeys[KeyType.RIGHT] === true:
                 this.playerGroup.translateX(this.currentMoveSpeed);
