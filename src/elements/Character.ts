@@ -150,6 +150,10 @@ export class Character {
         return size.y;
     }
 
+    public getBox(): Box3 {
+        return new Box3().setFromObject(this.model);
+    }
+
     public setOnGround(onGround: boolean): void {
         this.onGround = onGround;
     }

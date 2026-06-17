@@ -119,7 +119,7 @@ export class GameDirector {
 
         const playerGroup = new Group();
         this.scene.add(playerGroup);
-        this.character.model.rotation.y = Math.PI; // Rotate 180 degrees to face the camera
+        // this.character.model.rotation.y = Math.PI; // Rotate 180 degrees to face the camera
         playerGroup.add(this.character.model);
         playerGroup.add(camera);
 
